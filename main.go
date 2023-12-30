@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ssr0016/ecommerceCart/controllers"
+	"github.com/ssr0016/ecommerceCart/database"
 	"github.com/ssr0016/ecommerceCart/routes"
 )
 
@@ -22,7 +24,7 @@ func main() {
 	routes.UserRoutes(router)
 	router.Use(middlerware.Authentication())
 
-	router.GET("/addtocart", app.AddtoCart())
+	router.GET("/addtocart", app.AddToCart())
 	router.GET("/removeitem", app.RemoveItem())
 	router.GET("/cartcheckout", app.BuyFromCart())
 	router.GET("/instantbuy", app.InstantBuy())
