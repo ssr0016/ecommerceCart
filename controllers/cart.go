@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"gopkg.in/mgo.v2/bson"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ssr0016/ecommerceCart/database"
@@ -112,7 +112,7 @@ func (app *Application) BuyFromCart() gin.HandlerFunc {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
 
-		err := database.BuyItemFromCart(ctx, app.prodCollection, app.userCollection, userQueryID)
+		err := database.BuyItemFromCart(ctx, app.userCollection, userQueryID)
 		if err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, err)
 			return

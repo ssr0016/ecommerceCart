@@ -15,6 +15,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/ssr0016/ecommerceCart/database"
 	"github.com/ssr0016/ecommerceCart/models"
+	"github.com/ssr0016/ecommerceCart/tokens"
+	generate "github.com/ssr0016/ecommerceCart/tokens"
 )
 
 var UserCollection *mongo.Collection = database.UserData(database.Client, "Users")
@@ -94,7 +96,7 @@ func SignUp() gin.HandlerFunc {
 		user.ID = primitive.NewObjectID()
 		user.User_ID = user.ID.Hex()
 
-		token, refreshtoken, _ := generate.TokenGenerator(*user.Email, *user.First_Name, *user.Last_Name, user.User_ID)
+		token, refreshtoken, _ := tokens.TokenGenerator(*user.Email, *user.First_Name, *user.Last_Name, user.User_ID)
 		user.Token = &token
 		user.Refresh_Token = &refreshtoken
 		user.UserCart = make([]models.ProductUser, 0)
@@ -116,7 +118,7 @@ func Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-
+		var founduser models.User
 		var user models.User
 		if err := c.BindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err})
@@ -150,7 +152,28 @@ func Login() gin.HandlerFunc {
 }
 
 func ProductViewerAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
 
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var products models.Product
+		defer cancel()
+		if err := c.BindJSON(&products); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		products.Product_ID = primitive.NewObjectID()
+		_, anyerr := ProductCollection.InsertOne(ctx, products)
+		if anyerr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "not inserted"})
+			return
+		}
+
+		defer cancel()
+
+		c.JSON(http.StatusOK, "success")
+
+	}
 }
 
 func SearchProduct() gin.HandlerFunc {
